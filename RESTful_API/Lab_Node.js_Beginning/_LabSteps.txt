@@ -1,0 +1,269 @@
+# Node.js 程式入門實作
+
+
+1.	執行 Node.js 程式
+
+
+1.1	滑鼠右鍵點按 Lab_Node.js_Beginning 資料夾，
+	選擇: Open in Terminal，開啟終端機視窗
+
+
+1.2	輸入下列指令
+	node -v
+
+	<Note>出現 Node.js 的版本號碼，例如: v6.11.2
+
+
+1.3	在 Lab_Node.js_Beginning 資料夾，
+	建立一個檔名為 hello.js 的檔案，檔案內容如下:
+	console.log("Hello!");
+
+
+1.4	在終端機視窗輸入下列指令以執行 hello.js 程式:
+	node hello.js
+
+
+
+
+2.	以 NodeJS 讀寫檔案
+
+
+2.1	建立檔案。
+	在 Lab_Node.js_Beginning 資料夾
+	建立一個檔名為 writeFile.js 的檔案，檔案內容如下:
+
+var fs = require("fs");
+console.log("Starting...");
+fs.writeFile("./hello.html", 
+  "<html><body><h1>Hello!</h1></body></html>",
+  function (error) {
+	  console.log("已建立檔案.");
+  }
+);
+console.log("Finish Flag.");
+
+
+
+2.2	以 node writeFile.js 執行程式
+	觀察 console.log 文字的出現時間與次序。
+
+
+2.3	修改 writeFile.js 的程式，改成這樣:
+
+var fs = require("fs");
+console.log("Starting...");
+fs.writeFileSync("./world.html", 
+  "<html><body><h1>Hello! World.</h1></body></html>");
+console.log("已建立檔案.");
+
+
+2.4	以 node writeFile.js 執行程式。
+	
+	<Note> 2.1 與 2.3 兩個版本有何不同?
+
+
+2.5	在 Lab_Node.js_Beginning 資料夾
+	建立一個檔名為 readFile.js 的檔案，檔案內容如下:
+
+var fs = require("fs");
+console.log("Starting...");
+var data = fs.readFileSync("./world.html");
+console.log("file content: " + data);
+
+
+2.6	終端機視窗，輸入: node readFile.js 以執行程式。
+
+
+
+
+3.	以 Node.js 建立 Web Server
+
+
+3.1	在 Lab_Node.js_Beginning 資料夾
+	建立一個檔名為 createServer.js 的檔案，檔案內容如下:
+
+var http = require("http");
+console.log("Starting...");
+var host = "127.0.0.1";
+var port = 80;
+var server = http.createServer( function (request, response) {
+	console.log("Got a request: " + request.url);
+	response.writeHead(200, {"Content-type": "text/plain"});
+	response.end("Hello! I'm a Node.JS server.");
+});
+
+server.listen(port, host, function () {
+	console.log("Listening...");
+});
+
+
+3.2	node createServer.js 以啟動伺服器
+	然後以瀏覽器連接 http://localhost
+
+<Note>
+	以 Ctrl + C 組合鍵結束程式
+
+
+
+
+3.3	將 createServer.js 的程式修改成下列內容，然後重新執行一次。
+
+var http = require("http");
+var fs = require("fs");
+console.log("Starting...");
+var host = "127.0.0.1";
+var port = 80;
+var server = http.createServer( function (request, response) {
+	console.log("Got a request: " + request.url);
+	fs.readFile("." + request.url, function (error, data) {
+		if (error) {
+			response.writeHead(404, {"Content-type": "text/plain"});
+			response.end("File not found.");
+		} else {
+			response.writeHead(200, {"Content-type": "text/html"});
+			response.end(data);
+		}
+	});
+});
+
+server.listen(port, host, function () {
+	console.log("Listening...");
+});
+
+
+3.2	node createServer.js 以啟動伺服器
+	然後以瀏覽器連接 http://localhost/hello.html
+
+
+3.5	以 Ctrl + C 組合鍵結束 createServer.js 程式
+
+
+
+
+4	利用 Node.js ＋ Express 模組建立 Web Server
+
+
+4.1	在「終端機視窗」輸入「npm install express」
+
+	<Note>
+	請確認 node_modules 資料夾裡頭有 express 子資料夾
+
+
+4.2	將 createServer.js 的程式修改成下列內容:
+
+console.log("Starting...");
+var fs = require("fs");
+var host = "127.0.0.1";
+var port = 80;
+var express = require("express");
+var app = express();
+
+app.get("/", function (request, response) {
+	response.send("hello!");
+});
+
+app.listen(port, host);
+
+
+4.3	執行 node createServer.js，
+	然後以瀏覽器連接 http://localhost
+
+
+4.4	結束 createServer.js 程式
+
+
+4.5	將 createServer.js 的程式修改成下列內容:
+
+console.log("Starting...");
+var fs = require("fs");
+var host = "127.0.0.1";
+var port = 80;
+var express = require("express");
+
+var app = express();
+
+app.get("/", function (request, response) {
+	response.send("hello!");
+});
+
+app.get("/hello/:text", function (request, response) {
+	response.send("Hello! " + request.params.text);
+});
+
+app.listen(port, host);
+
+
+4.6	執行 createServer.js，
+	然後以瀏覽器連接:
+	http://localhost/hello/你的名字
+	例如: 
+	http://localhost/hello/Chien
+
+	
+4.7	結束 createServer.js 程式
+
+
+4.8	將 createServer.js 的程式修改成下列內容:
+
+console.log("Starting...");
+var fs = require("fs");
+var host = "127.0.0.1";
+var port = 80;
+var express = require("express");
+
+var app = express();
+
+app.get("/", function (request, response) {
+	response.send("hello!");
+});
+
+app.get("/hello/:text", function (request, response) {
+	response.send("Hello!" + request.params.text);
+});
+
+// Web伺服器的靜態檔案置於 public 資料夾
+app.use( express.static( "public" ) );
+
+app.listen(port, host);
+
+
+4.9	在 Lab_Node.js_Beginning 建立新的資料夾，名稱: public
+
+
+4.a	將 hello.html 與 world.html 都搬進新的 public 資料夾
+
+
+4.b	執行 createServer.js，
+	然後以瀏覽器連接:
+	http://localhost/hello.html
+
+	
+4.c	結束 createServer.js 程式
+
+	<Note> public 資料夾有何用途?
+
+
+
+5.	Node.js 的模組化設計
+
+
+5.1	在 Lab_Node.js_Beginning 資料夾
+	建立一個檔名為 myModule.js 的檔案，檔案內容如下:
+
+function hello(who) {
+	return "Hello! " + who;
+}
+
+module.exports.hello = hello;
+
+
+5.2	在 Lab_Node.js_Beginning 資料夾
+	建立一個檔名為 usingModule.js 的檔案，檔案內容如下:
+
+var myModule = require("./myModule.js");
+var rtn = myModule.hello("World");
+console.log(rtn);
+
+
+5.3	node usingModule.js 執行程式。
+

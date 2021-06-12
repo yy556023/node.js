@@ -1,0 +1,114 @@
+Lab: 以 Node.js + request + cheerio 實作爬蟲程式
+
+
+
+
+1.	找出目標資料的 selector
+
+
+1.1	用 Chrome 連接 https://www.taipower.com.tw/TC/news2.aspx?mid=225
+
+
+1.2	滑鼠右鍵點按第一則快訊，從快捷功能表選擇最後一項:「檢查」
+
+
+1.3	滑鼠右鍵點按 <ul> 裏頭的第個 <li>，
+    從快捷功能表選擇「Copy」|「Copy selector」。
+
+
+1.4	貼入內容到本文件，應該會類似這樣:
+#news_box3 > div.box_list > ul > li:nth-child(1)
+
+
+1.5	去掉最後的 :nth-child(1)，稍後我們會用到這段語法:
+#news_box3 > div.box_list > ul > li
+
+
+
+
+2.  下載網頁
+
+
+2.1 滑鼠右鍵點按本資料夾 | Open in Terminal
+    在終端機視窗輸入下列指令以安裝本練習所需的 Node.js 模組:
+    npm install request cheerio
+
+
+2.2 在本資料夾建立新檔案，檔名: lab.js
+    內容如下:
+
+const request = require('request');
+const url = 'https://www.taipower.com.tw/TC/news2.aspx?mid=225';
+
+request(url, function (error, response, html) {
+    console.log(html);
+})
+
+
+2.3 在終端機視窗輸入下列指令，測試網頁下載功能
+    node lab.js
+
+    <Note>順利的話，會顯示剛才看過的台電最新消息。
+
+
+
+
+3.  剖析網頁內容，擷取目標
+
+
+3.1 修改 lab.js，新內容如下:
+
+const request = require('request');
+const $ = require('cheerio');
+const url = 'https://www.taipower.com.tw/TC/news2.aspx?mid=225';
+
+request(url, function (error, response, html) {
+    var liList = $("#news_box3 > div.box_list > ul > li", html);
+    console.log(liList.length);
+    // console.log(liList);
+})
+
+
+3.2 在終端機視窗輸入下列指令，
+    node lab.js
+
+    <Note>順利的話，會出現數字 10 (10則新聞)
+
+
+3.3 請試著回答下列問題:
+
+(a) 傳入 $() 的參數為何是 "#news_box3 > div.box_list > ul > li"
+(b) cheerio 像不像是 Node.js 版的 jQuery? 
+(c) cheerio 的功能是什麼?
+
+
+3.4 修改 lab.js，新內容如下:
+
+const request = require('request');
+const $ = require('cheerio');
+const url = 'https://www.taipower.com.tw/TC/news2.aspx?mid=225';
+
+request(url, function (error, response, html) {
+    var newsList = [];
+    var liList = $("#news_box3 > div.box_list > ul > li", html);
+    liList.each(function (index, element) {
+        var newsItem = {
+            newsUrl: $(element).find("a").prop("href"),
+            newsTitle: $(element).find("a div h3").text(),
+            newsTime: $(element).find("a div span").text()
+        };
+        newsList.push(newsItem);
+        console.log(newsItem);
+    })
+    console.log(newsList);
+})
+
+
+
+3.5 在終端機視窗輸入下列指令，
+    node lab.js
+
+    <Note>順利的話，會出現 10 則新聞的網址、標題與時間
+
+
+3.6 請練習將這十則「最新消息」，存檔成檔案或匯入到資料庫

@@ -1,0 +1,97 @@
+Lab: 以 nodemailer 透過 Gmail 寄送電子郵件
+
+
+1.  設定 Gmail 的「低安全性應用程式存取權」
+
+
+1.1 登入到 Google Mail
+    https://mail.google.com
+
+
+1.2 展開瀏覽器右上角帳號圖示，
+    點按「管理你的 Google 帳號」
+
+
+1.3 在左邊側邊欄，點按「安全性」
+    如果「低安全性應用程式存取權」的狀態不是「開啟」，
+    請點一下「開啟存取權」
+
+    <Note>
+    請用分身帳號練習，或者在本練習之後，關閉存取權
+
+
+
+
+2.  安裝 nodemailer
+
+
+2.1 滑鼠右鍵點按本資料夾 | Open in Integraged Terminal
+
+
+2.2 在終端機視窗，輸入:
+    npm install nodemailer
+
+
+
+
+3.  寄送電子郵件
+
+
+3.1 在本資料夾新建檔案，檔名: index.js，內容如下:
+
+var nodemailer = require("nodemailer");
+
+var transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: "your.gmail@gmail.com",  // lab 3.2
+        pass: "yourPassword" // lab 3.2
+    }
+});
+
+var mailOptions = {
+    from: "your.gmail@gmail.com",  // lab 3.3
+    to: "send.to@gmail.com", // lab 3.3
+    subject: "test mail, take 1",  // lab 3.5
+    text: "Mail body (Text)"  // lab 3.6
+};
+
+transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+        console.log(error);
+    } else {
+        console.log("訊息發送: " + info.response);
+    }
+});
+
+
+3.2 針對 lab 3.2 那兩行註解，
+    設定成你的 gmail 帳號與密碼
+
+
+3.3 針對 lab 3.3 那兩行註解，
+    from 填入你的 gmail 帳號
+    to 屬性的屬性值為收件人電子郵件位址
+
+
+3.4 在終端機視窗，輸入:
+    node index.js
+
+    <Note>
+    順利的話，收件人的信箱應該會出現新信件。
+
+
+3.5 將 lab 3.5 那行，改成 
+    subject: "test mail, take 2"
+
+
+3.6 將 lab 3.6 那行，改成 
+    html: "<h1>Heading</h1><a href='https://en.wikipedia.org/'>Wiki</a>"
+
+
+3.7 在終端機視窗，輸入:
+    node index.js
+
+    <Note>
+    順利的話，收件人的信箱應該會出現HTML版本的新信件。
+

@@ -1,0 +1,230 @@
+Lab: 以 Node.js 建構 Web API
+
+
+1.  執行下列 SQL Script 以建立本次練習所需的資料庫。
+
+
+CREATE DATABASE newsDb
+GO
+
+USE newsDb
+GO
+
+CREATE TABLE news (
+  newsId int IDENTITY(1,1) NOT NULL PRIMARY KEY,
+  ymd char(10),
+  title nvarchar(50)
+)
+GO
+
+INSERT news (ymd, title) VALUES ('2021-05-01', N'News A')
+INSERT news (ymd, title) VALUES ('2021-05-02', N'News B')
+INSERT news (ymd, title) VALUES ('2021-05-03', N'News C')
+INSERT news (ymd, title) VALUES ('2021-05-04', N'News D')
+INSERT news (ymd, title) VALUES ('2021-05-05', N'News E')
+GO
+
+
+
+
+
+2.  套件安裝與系統設定
+
+2.1	滑鼠右鍵 Lab_WebAPI 資料夾 | Open in Terminal，
+	輸入下列指令以安裝/更新本程式所需的模組:
+
+npm install express
+npm install body-parser
+npm install express-session
+npm install ejs
+npm install mssql
+npm install msnodesqlv8
+
+
+2.2	請先將有用到埠號 80 的程式停下來以免埠號衝突
+
+
+2.3 確認 MS SQL Server 運作中
+
+
+2.4 設定 SQL Server 的 TCP/IP 組態
+
+    (A) 啟動: SQL Server 2019 設定管理員 (SQLServerManager15.msc)
+    (B) SQL Server 網路組態 | 滑鼠右鍵點按 TCP/IP | 內容
+    (C) 在「通訊協定」頁籤，已啟用: 選擇「是」
+    (D) 在「IP位址」頁籤，捲到最底部，針對 IP All，
+        TCP動態通訊埠: 清空
+        TCP通訊埠: 1433
+
+
+2.5 重新啟動 SQL Server
+
+
+
+3.  檢視目前程式進度
+
+
+3.1 點兩下 app.js 開啟檔案，檢視其中的程式與註解
+
+
+3.2 滑鼠右鍵 Lab_WebAPI 資料夾 | Open in Integrated Terminal，
+	輸入 node app.js 以執行程式。
+
+
+3.3 在瀏覽器連接 http://localhost
+
+    <Note>
+    public/index.html 的表單畫面與程式皆已完成，
+    就等我們伺服端的 Web API 完工，即可運作。
+
+
+
+
+4.  實作 Web API 的資料查詢功能
+
+
+4.1 修改 app.js，在檔案結尾處，附加下列程式:
+	<Note> 請記得修改 password 屬性
+
+// 資料庫連線設定
+var sql = require('mssql/msnodesqlv8');
+const config  = {
+    driver: "msnodesqlv8",
+    server: "localhost",
+    // port:1433,
+    trustServerCertificate: true,
+    database: "NewsDb",
+    // user:'sa',
+    // password:'Pa$$w0rd',
+    options: {
+        trustedConnection: true,
+        instance: "sqlexpress"
+    }
+};
+
+
+4.2 繼續附加下列程式:
+
+app.get("/home/news", async function (request, response) {
+	var x = await sql.connect(config);
+	const result = await sql.query("select * from news");
+	response.send(JSON.stringify(result.recordset));
+})
+
+
+4.3 在終端機視窗，Ctrl + C 結束，
+	重新 node app.js 啟動 Web Server，再以瀏覽器連接:
+	http://localhost/home/news
+    
+    <Note> 一切順利的話，應該會看到下列 JSON 資料:
+    [
+      {"newsId":1,"ymd":"2017-05-01","title":"News A"},
+      {"newsId":2,"ymd":"2017-05-02","title":"News B"},
+      {"newsId":3,"ymd":"2017-05-03","title":"News C"},
+      {"newsId":4,"ymd":"2017-05-04","title":"News D"},
+      {"newsId":5,"ymd":"2017-05-05","title":"News E"}
+    ]
+
+
+4.4 在瀏覽器連接 http://localhost/
+    
+
+    <Note> 網頁內容不再是 First, Second, Third
+    而是 Web API 界接出來的資料庫內容
+
+
+(Optional)
+4.5 檢視 public/index.html 的程式。
+
+
+
+
+5.  實作 Web API 的資料新增功能
+
+
+5.1 修改 app.js，在檔案結尾處，附加下列程式:
+
+app.post("/home/news", async function (request, response) {
+	var x = await sql.connect(config);
+	var commandText = `insert into news (title, ymd) values (
+		'${request.body.title}', 
+		'${request.body.ymd}'
+		)`;
+	const result = await sql.query(commandText);
+	response.send("Row Inserted"); 
+})
+
+
+5.2 在終端機視窗，Ctrl + C 結束，
+	重新 node app.js 啟動 Web Server，再以瀏覽器連接:
+	http://localhost
+
+    
+5.3 點按「+」按鈕，填入表單資料
+
+
+(Optional)
+5.4 檢視 public/index.html 的程式。
+
+
+
+
+6.  實作 Web API 的資料修改功能
+
+
+6.1 修改 app.js，在檔案結尾處，附加下列程式:
+
+app.put("/home/news", async function (request, response) {
+	var x = await sql.connect(config);
+	var commandText = `update news set 
+		title = '${request.body.title}', 
+		ymd = '${request.body.ymd}'
+		where newsId = ${request.body.newsId}
+		`;
+	const result = await sql.query(commandText);
+	response.send("row updated.");
+})
+
+
+6.2 在終端機視窗，Ctrl + C 結束，
+	重新 node app.js 啟動 Web Server，再以瀏覽器連接:
+	http://localhost
+
+    
+6.3 點按任何一筆資料的「修改」按鈕(筆)，在表單填入資料
+
+
+(Optional)
+6.4 檢視 public/index.html 的程式。
+
+
+
+
+7.  實作 Web API 的資料刪除功能
+
+
+7.1 修改 app.js，在檔案結尾處，附加下列程式:
+
+app.delete("/home/news", async function (request, response) {
+	var x = await sql.connect(config);
+	var commandText = `delete from news where 
+		newsId = ${request.body.newsId}
+		`;
+	const result = await sql.query(commandText);
+	response.send("row deleted.");
+})
+
+
+7.2 在終端機視窗，Ctrl + C 結束，
+	重新 node app.js 啟動 Web Server，再以瀏覽器連接:
+	http://localhost
+
+    
+7.3 點按任何一筆資料的「刪除」按鈕，測試刪除功能
+
+
+(Optional)
+7.4 檢視 public/index.html 的程式。
+
+
+

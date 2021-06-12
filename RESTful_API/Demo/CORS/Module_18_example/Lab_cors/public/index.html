@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+<body>
+    Your name:
+    <input type="text" id="userName" />
+    <input type="button" id="helloButton" value="Hello" />
+    <div id="report"></div>
+
+    <script>
+        $("#helloButton").click(function () {
+            let userName = $("#userName").val();
+			let url = "http://www.beauty.com/hello/";
+			// let url = "http://www.monster.com/hello/"
+            $.get(url + userName, function (data) {
+                $("#report").text(data);
+            })
+        })
+    </script>
+</body>
+</html>
